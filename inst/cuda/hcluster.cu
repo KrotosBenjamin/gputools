@@ -1,3 +1,5 @@
+#include <math_constants.h>
+
 #define NUM_THREADS 32
 #define NUM_BLOCKS 1024
 

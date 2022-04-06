@@ -24,10 +24,10 @@ void hcluster(const float * dist, size_t dist_pitch, size_t n,
 
   // Copy the distance matrix
   cudaMemcpy2D(hcluster_dist_d, pitch_dist_d,
-               dist, dist_pitch, 
+               dist, dist_pitch,
                n * sizeof(float), n,
                cudaMemcpyHostToDevice);
-  
+
   hclusterPreparedDistances(hcluster_dist_d, pitch_dist_d, n,
                             sub, sup,
                             val,
@@ -68,13 +68,13 @@ void hclusterPreparedDistances(float * gpuDist, size_t pitch_dist_d, size_t n,
   for(size_t i = 0; i < n; ++i)
     pre_count[i] = 1.0;
 
-  cudaMemcpy(hcluster_count_d, pre_count, n * sizeof(float), 
+  cudaMemcpy(hcluster_count_d, pre_count, n * sizeof(float),
              cudaMemcpyHostToDevice);
   checkCudaError("hcluster : malloc and memcpy");
 
   Free(pre_count);
 
-  dim3 
+  dim3
     grid0(NUM_BLOCKS, 1, 1), block0(NUM_THREADS, 1, 1),
     grid1(1, 1, 1), block1(NUM_THREADS, 1, 1);
 
@@ -125,29 +125,29 @@ void hclusterPreparedDistances(float * gpuDist, size_t pitch_dist_d, size_t n,
   }
 
   void * findMin1Args[] = {
-    &gpuDist, 
+    &gpuDist,
     &gpuPitch,
     &n,
-    &hcluster_count_d, 
+    &hcluster_count_d,
     &hcluster_min_val_d,
     &hcluster_min_col_d,
     0  // place holder for row_offset (a loop variable)
   };
   void * findMin2Args[] = {
-    &hcluster_min_val_d, 
+    &hcluster_min_val_d,
     &hcluster_min_col_d,
-    &hcluster_count_d, 
-    &hcluster_sub_d, 
-    &hcluster_sup_d, 
+    &hcluster_count_d,
+    &hcluster_sub_d,
+    &hcluster_sup_d,
     &hcluster_merge_val_d,
     &n,
     0 // place holder for iter
   };
   void * funcArgs[] = {
-    &gpuDist, 
+    &gpuDist,
     &gpuPitch,
     &n,
-    &hcluster_sub_d, 
+    &hcluster_sub_d,
     &hcluster_sup_d,
     &hcluster_count_d,
     &hcluster_merge_val_d,
@@ -165,7 +165,7 @@ void hclusterPreparedDistances(float * gpuDist, size_t pitch_dist_d, size_t n,
       cudaLaunch("find_min1_kernel", findMin1Args,
                         grid0, block0);
     }
-                
+
     // Find overall winner; update arrays sub, sup, val, count
     findMin2Args[7] = &iter;
     cudaLaunch("find_min2_kernel", findMin2Args,
@@ -181,11 +181,11 @@ void hclusterPreparedDistances(float * gpuDist, size_t pitch_dist_d, size_t n,
   checkCudaError("hcluster : method kernel calls");
 
   // Copy results
-  cudaMemcpy(sub, hcluster_sub_d, (n - 1) * sizeof(int), 
-             cudaMemcpyDeviceToHost);        
-  cudaMemcpy(sup, hcluster_sup_d, (n - 1) * sizeof(int), 
+  cudaMemcpy(sub, hcluster_sub_d, (n - 1) * sizeof(int),
              cudaMemcpyDeviceToHost);
-  cudaMemcpy(val, hcluster_merge_val_d, (n-1)*sizeof(float), 
+  cudaMemcpy(sup, hcluster_sup_d, (n - 1) * sizeof(int),
+             cudaMemcpyDeviceToHost);
+  cudaMemcpy(val, hcluster_merge_val_d, (n-1)*sizeof(float),
              cudaMemcpyDeviceToHost);
 
   checkCudaError("hcluster : results memcpy");
