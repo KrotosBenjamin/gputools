@@ -14,7 +14,7 @@
 #define NUMTHREADS 16
 #define THREADWORK 32
 
-void testSignif(const float * goodPairs, const float * coeffs, 
+void testSignif(const float * goodPairs, const float * coeffs,
                 size_t n, float * tscores)
 {
   size_t
@@ -31,7 +31,7 @@ void testSignif(const float * goodPairs, const float * coeffs,
 
   size_t nblocks = n / (NUMTHREADS*THREADWORK);
   if(nblocks*(NUMTHREADS*THREADWORK) < n) nblocks++;
-  dim3 
+  dim3
     tblock(NUMTHREADS), tgrid(nblocks);
 
   void * args[] = {
@@ -48,13 +48,13 @@ void testSignif(const float * goodPairs, const float * coeffs,
   cudaFree(gpuTs);
 }
 
-void hostSignif(const float * goodPairs, const float * coeffs, size_t n, 
+void hostSignif(const float * goodPairs, const float * coeffs, size_t n,
                 float * tscores)
 {
   float cor, radicand;
   for(size_t i = 0; i < n; i++) {
     cor = coeffs[i];
-    if(cor >= 0.999f) 
+    if(cor >= 0.999f)
       tscores[i] = 10000.0f;
     else {
       radicand = (goodPairs[i] - 2.f) / (1.f - cor * cor);
@@ -69,15 +69,15 @@ void pmcc(UseObs whichObs,
     size_t dim, float * numPairs, float * correlations,
           float * signifs)
 {
-  size_t 
+  size_t
     fbytes = sizeof(float);
-  int 
+  int
     same = (vectsa == vectsb);
   float
     * gpuVA, * gpuVB,
-    * gpuNumPairs, * gpumean, * gpuSds, 
+    * gpuNumPairs, * gpumean, * gpuSds,
     * gpuCorrelations;
-  dim3 
+  dim3
     block(NUMTHREADS), grid(na, nb);
 
   cudaMalloc((void **)&gpuNumPairs, na*nb*fbytes);
@@ -88,7 +88,7 @@ void pmcc(UseObs whichObs,
   cudaMalloc((void**)&gpuVA, na*dim*fbytes);
   cudaMemcpy(gpuVA, vectsa, na*dim*fbytes, cudaMemcpyHostToDevice);
 
-  if(!same) { 
+  if(!same) {
     cudaMalloc((void**)&gpuVB, nb*dim*fbytes);
     cudaMemcpy(gpuVB, vectsb, nb*dim*fbytes, cudaMemcpyHostToDevice);
   } else {
@@ -138,17 +138,17 @@ void pmcc(UseObs whichObs,
 
     cudaLaunch("gpuSDNoTest", argsSD, grid, block);
     cudaThreadSynchronize();
-    
+
     cudaLaunch("gpuPMCCNoTest", argsPMCC, grid, block);
   }
 
-  cudaMemcpy(correlations, gpuCorrelations, na*nb*fbytes, 
+  cudaMemcpy(correlations, gpuCorrelations, na*nb*fbytes,
              cudaMemcpyDeviceToHost);
   cudaMemcpy(numPairs, gpuNumPairs, na*nb*fbytes, cudaMemcpyDeviceToHost);
   checkCudaError("PMCC function : kernel finish and memcpy");
 
   hostSignif(numPairs, correlations, na*nb, signifs);
-    
+
   // Free allocated space
   cudaFree(gpuNumPairs);
   cudaFree(gpumean);
@@ -183,12 +183,12 @@ void findMinMax(const int * data, size_t n, int * minVal, int * maxVal) {
   }
 }
 
-void getData(const int * images, 
+void getData(const int * images,
              const int * xcoords, const int * ycoords, const int * zcoords,
              const int * mins, const int * maxes,
              const float * evs, size_t numrows, size_t numimages, float * output)
 {
-  int 
+  int
     xmin, ymin, zmin,
     xmax, ymax, zmax,
     prevImg;
@@ -199,11 +199,11 @@ void getData(const int * images,
 
   xmin = mins[0];
   ymin = mins[1];
-  zmin = mins[2]; 
+  zmin = mins[2];
 
   xmax = maxes[0];
   ymax = maxes[1];
-  zmax = maxes[2];        
+  zmax = maxes[2];
 
   nx = 1+abs(xmax - xmin);
   ny = 1+abs(ymax - ymin);
@@ -222,18 +222,18 @@ void getData(const int * images,
   }
 }
 
-size_t parseResults(const int * imageList1, size_t numImages1, 
+size_t parseResults(const int * imageList1, size_t numImages1,
                     const int * imageList2, size_t numImages2,
                     int structureid,
                     double cutCorrelation, int cutPairs,
-                    const double * correlations, const double * signifs, const int * numPairs, 
+                    const double * correlations, const double * signifs, const int * numPairs,
                     double * results)
 {
-  size_t 
+  size_t
     i, j, pos, nrows = 0,
     readpos, writepos;
-  double 
-    sid = (double) structureid, 
+  double
+    sid = (double) structureid,
     npair, img1, img2, coeff, signif;
 
   for(i = 0; i < numImages1; i++) {
@@ -247,7 +247,7 @@ size_t parseResults(const int * imageList1, size_t numImages1,
       signif = (double) signifs[readpos];
       img2 = (double) imageList2[j];
 
-      if((fabs(coeff) >= cutCorrelation) && (npair >= cutPairs) 
+      if((fabs(coeff) >= cutCorrelation) && (npair >= cutPairs)
          && (img1 < img2) && isSignificant(signif, numPairs[readpos]-2))
         {
           writepos = 6*nrows;
@@ -267,14 +267,14 @@ size_t parseResults(const int * imageList1, size_t numImages1,
 int isSignificant(double signif, int df) {
   double tcutoffs[49] = {
     // cuttoffs for degrees of freedom <= 30
-    637.000, 31.600, 2.920, 8.610, 6.869, 5.959, 5.408, 5.041, 4.781, 
-    4.587, 4.437, 4.318, 4.221, 4.140, 4.073, 4.015, 3.965, 3.922, 
-    3.883, 3.850, 3.819, 3.792, 3.768, 3.745, 3.725, 3.707, 3.690, 
+    637.000, 31.600, 2.920, 8.610, 6.869, 5.959, 5.408, 5.041, 4.781,
+    4.587, 4.437, 4.318, 4.221, 4.140, 4.073, 4.015, 3.965, 3.922,
+    3.883, 3.850, 3.819, 3.792, 3.768, 3.745, 3.725, 3.707, 3.690,
     3.674, 3.659, 3.646,
     // cuttoffs for even degrees of freedom > 30 but <= 50
-    3.622, 3.601, 3.582, 3.566, 3.551, 3.538, 3.526, 3.515, 3.505, 3.496, 
+    3.622, 3.601, 3.582, 3.566, 3.551, 3.538, 3.526, 3.515, 3.505, 3.496,
     // 55 <= df <= 70 by 5s
-    3.476, 3.460, 3.447, 3.435, 
+    3.476, 3.460, 3.447, 3.435,
     3.416, // 80
     3.390, // 100
     3.357, // 150
@@ -312,12 +312,12 @@ size_t signifFilter(const double * data, size_t rows, double * results)
 
   for(i = 0; i < rows; i++) {
     inrow = i * 5;
-    outrow = rowcount * 6;  
+    outrow = rowcount * 6;
 
     cor = data[inrow+3];
     npairs = data[inrow+4];
 
-    if(cor >= 0.999) 
+    if(cor >= 0.999)
       tscore = 10000.0;
     else {
       radicand = (npairs - 2.0) / (1.0 - cor * cor);
@@ -352,7 +352,7 @@ void updateSignifs(const float * data, size_t n, float * results)
 
   size_t nblocks = n / (NUMTHREADS*THREADWORK);
   if(nblocks*(NUMTHREADS*THREADWORK) < n) nblocks++;
-  dim3 
+  dim3
     tblock(NUMTHREADS), tgrid(nblocks);
 
   void * args[] = {
@@ -369,7 +369,7 @@ void updateSignifs(const float * data, size_t n, float * results)
 
 size_t gpuSignifFilter(const float * data, size_t rows, float * results)
 {
-  size_t 
+  size_t
     i, rowbytes = 6*sizeof(float),
     inrow, outrow, rowcount = 0;
 
@@ -379,11 +379,11 @@ size_t gpuSignifFilter(const float * data, size_t rows, float * results)
 
   for(i = 0; i < rows; i++) {
     inrow = i*6;
-    outrow = rowcount*6;    
+    outrow = rowcount*6;
 
     if(results[inrow] == -1.f) continue;
 
-    memcpy(results+outrow, results+inrow, rowbytes); 
+    memcpy(results+outrow, results+inrow, rowbytes);
     rowcount++;
   }
   return rowcount;
@@ -394,7 +394,7 @@ void cublasPMCC(const float * sampsa, size_t numSampsA,
                 size_t sampSize,
                 float * res)
 {
-  int 
+  int
     same = (sampsa == sampsb);
   float
     * gpua, * gpub, * gpuRes,
@@ -423,18 +423,18 @@ void cublasPMCC(const float * sampsa, size_t numSampsA,
   cublasFree(gpuaRecipSD);
 
   for(size_t i = 0; i < numSampsA; i++) { // sum of squares
-    float denom = 
+    float denom =
       cublasSdot(sampSize, gpua+i*sampSize, 1, gpua+i*sampSize, 1);
     aRecipSD[i] = 1.f / sqrtf(denom);
   }
   for(size_t i = 0; i < numSampsA; i++) // div each sample by sqrt of s-o-s
-    cublasSscal(sampSize, aRecipSD[i], gpua+i*sampSize, 1); 
+    cublasSscal(sampSize, aRecipSD[i], gpua+i*sampSize, 1);
   Free(aRecipSD);
   checkCublasError("PMCC : vector ops for A");
 
   if(!same) {
     float * bRecipSD = Calloc(numSampsB, float);
-        
+
     cublasAlloc(numSampsB*sampSize, sizeof(float), (void **)&gpub);
     cublasSetVector(numSampsB*sampSize, sizeof(float), sampsb, 1, gpub, 1);
 
@@ -456,19 +456,19 @@ void cublasPMCC(const float * sampsa, size_t numSampsA,
       &gpubRecipSD
     };
     cudaLaunch("noNAsPmccMeans", args, dimGrid, dimBlock);
-        
+
     for(size_t i = 0; i < sampSize; i++) // subtract mean
       cublasSaxpy(numSampsB, -1.f, gpubRecipSD, 1, gpub+i, sampSize);
     cublasFree(gpubRecipSD);
-        
+
     for(size_t i = 0; i < numSampsB; i++) { // sum of squares
-      float denom = 
-        cublasSdot(sampSize, gpub+i*sampSize, 1, 
+      float denom =
+        cublasSdot(sampSize, gpub+i*sampSize, 1,
                    gpub+i*sampSize, 1);
       bRecipSD[i] = 1.f / sqrtf(denom);
     }
     for(size_t i = 0; i < numSampsB; i++) // div by s-o-s
-      cublasSscal(sampSize, bRecipSD[i], gpub+i*sampSize, 1); 
+      cublasSscal(sampSize, bRecipSD[i], gpub+i*sampSize, 1);
     Free(bRecipSD);
     checkCublasError("PMCC : setup for matrix B");
   } else {
@@ -476,8 +476,8 @@ void cublasPMCC(const float * sampsa, size_t numSampsA,
   }
 
   cublasAlloc(numSampsA*numSampsB, sizeof(float), (void **)&gpuRes);
-  cublasSgemm('T', 'N', numSampsB, numSampsA, sampSize, 1.f, 
-              gpub, sampSize, gpua, sampSize, 0.f, gpuRes, numSampsB); 
+  cublasSgemm('T', 'N', numSampsB, numSampsA, sampSize, 1.f,
+              gpub, sampSize, gpua, sampSize, 0.f, gpuRes, numSampsB);
   // each entry : sum of prod of standard scores
   cublasGetVector(numSampsA*numSampsB, sizeof(float), gpuRes, 1, res, 1);
   checkCublasError("PMCC : alloc, matrix mult and get result");
@@ -491,9 +491,9 @@ double hostKendall(const float * X, const float * Y, size_t n) {
   concordant = discordant = 0.0;
   for(size_t i = 0; i < n; i++) {
     for(size_t j = i+1; j < n; j++) {
-      if((X[j] > X[i]) && (Y[j] > Y[i])) 
+      if((X[j] > X[i]) && (Y[j] > Y[i]))
         concordant = concordant + 1.0;
-      else if((X[j] < X[i]) && (Y[j] < Y[i])) 
+      else if((X[j] < X[i]) && (Y[j] < Y[i]))
         concordant = concordant + 1.0;
     }
   }
@@ -509,7 +509,7 @@ void permHostKendall(const float * a, size_t na,
 {
   for(size_t i = 0; i < nb; i++) {
     for(size_t j = 0; j < na; j++) {
-      results[i*na+j] = hostKendall(a+j*sampleSize, b+i*sampleSize, 
+      results[i*na+j] = hostKendall(a+j*sampleSize, b+i*sampleSize,
                                     sampleSize);
     }
   }

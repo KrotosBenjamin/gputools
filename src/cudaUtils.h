@@ -26,13 +26,8 @@
 //     }                                                             \
 //   } while(0)                                                      \
 
-// void cudaLaunch(std::string kernelName,
-//                 void * args[],
-//                 const dim3 &gridDim, const dim3 &blockDim,
-//                 cudaStream_t stream = NULL);
-
-#define CUDA_SAFE_CALL(ans) { cudaLaunch((ans), __FILE__, __LINE__); }
-inline void cudaLaunch(cudaError_t err, const char *file, int line,
+#define CUDA_SAFE_CALL(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t err, const char *file, int line,
                        bool abort=true)
 {
     if (err != cudaSuccess)
@@ -42,4 +37,10 @@ inline void cudaLaunch(cudaError_t err, const char *file, int line,
         if (abort) exit(err);
     }
 }
+
+void cudaLaunch(std::string kernelName,
+                void * args[],
+                const dim3 &gridDim, const dim3 &blockDim,
+                cudaStream_t stream = NULL);
+
 #endif /* _CUDAUTILS_H_ */
