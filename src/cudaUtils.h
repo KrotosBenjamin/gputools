@@ -16,14 +16,14 @@
     }                                                \
   } while(0)
 
-#define CUDA_SAFE_CALL(x)                                       \
-  do {                                                          \
-    CUresult result = x;                                        \
-    if (result != CUDA_SUCCESS) {                               \
-      const char *msg;                                          \
-      cuGetErrorName(result, &msg);                             \
-      error("\nerror: %d failed with error %s\n", x, msg);      \
-    }                                                           \
+#define CUDA_SAFE_CALL(call)
+do {
+    cudaError_t err = call;
+    if (cudaSuccess != err) {
+        fprintf(stderr, "Cuda error in file '%s' in line %i : %s.",
+                __FILE__, __LINE__, cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
   } while(0)
 
 void cudaLaunch(std::string kernelName,

@@ -39,7 +39,7 @@ static
 std::vector<std::string> & getFileKernels(std::string file)
 {
   std::vector<std::string> * kernels;
-  if (file == "correlation") {  
+  if (file == "correlation") {
     std::string newKernels[] =
       { "gpuSignif"
       , "gpuMeans"
@@ -53,7 +53,7 @@ std::vector<std::string> & getFileKernels(std::string file)
       };
     kernels = new std::vector<std::string>(newKernels, newKernels + 9);
   } else if (file == "distance") {
-    std::string newKernels[] = 
+    std::string newKernels[] =
       { "euclidean_kernel_same"
       , "maximum_kernel_same"
       , "manhattan_kernel_same"
@@ -63,7 +63,7 @@ std::vector<std::string> & getFileKernels(std::string file)
       };
     kernels = new std::vector<std::string>(newKernels, newKernels + 6);
   } else if (file == "granger") {
-    std::string newKernels[] = 
+    std::string newKernels[] =
       { "getRestricted"
       , "getUnrestricted"
       , "ftest"
@@ -73,7 +73,7 @@ std::vector<std::string> & getFileKernels(std::string file)
       };
     kernels = new std::vector<std::string>(newKernels, newKernels + 6);
   } else if (file == "hcluster") {
-    std::string newKernels[] = 
+    std::string newKernels[] =
       { "complete_kernel"
       , "wpgma_kernel"
       , "average_kernel"
@@ -135,12 +135,12 @@ void cuCompile(const int * numFiles,
         0,                       // numHeaders
         NULL,                    // headers
         NULL));                  // includeNames
-    
+
     std::vector<std::string> kernels = getFileKernels(file);
     for(int i = 0; i < kernels.size(); ++i) {
       NVRTC_SAFE_CALL(nvrtcAddNameExpression(*prog, kernels[i].c_str()));
     }
-    
+
     const char * options[] = { "--use_fast_math" };
 
     nvrtcResult compileResult = nvrtcCompileProgram(*prog, 1, options);
@@ -159,7 +159,7 @@ void cuCompile(const int * numFiles,
     for(int i = 0; i < kernels.size(); ++i) {
       const char * name;
       NVRTC_SAFE_CALL(nvrtcGetLoweredName(*prog, kernels[i].c_str(), &name));
-      (*cudaKernels)[kernels[i]] = new CudaKernel(name, ptx, prog); 
+      (*cudaKernels)[kernels[i]] = new CudaKernel(name, ptx, prog);
     }
   }
 }
@@ -170,13 +170,13 @@ void unloadPackage()
   std::vector<const char *> ptxs;
   std::vector<nvrtcProgram *> progs;
 
-  std::map<std::string, CudaKernel *>::iterator iter;  
+  std::map<std::string, CudaKernel *>::iterator iter;
   for (iter = cudaKernels->begin(); iter != cudaKernels->end(); ++iter) {
     ptxs.push_back(iter->second->ptx);
     progs.push_back(iter->second->prog);
     delete iter->second;
   }
-  
+
   delete cudaKernels;
 
   std::sort(ptxs.begin(), ptxs.end());
