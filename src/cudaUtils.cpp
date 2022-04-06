@@ -5,7 +5,7 @@
 
 #include "R.h"
 #include "nvrtc.h"
-#include "cuda.h"
+#include "cuda_runtime.h"
 
 #include "cudaUtils.h"
 
