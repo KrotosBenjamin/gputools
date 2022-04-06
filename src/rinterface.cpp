@@ -155,19 +155,19 @@ dist_method getDistEnum(const char * methodStr)
   return EUCLIDEAN;
 }
 
-hc_method getClusterEnum(const char * methodStr)
-{
-  if(0 == strcmp(methodStr,"complete"))           return COMPLETE;
-  if(0 == strcmp(methodStr,"wpgma"))                      return WPGMA;
-  if(0 == strcmp(methodStr,"average"))            return AVERAGE;
-  if(0 == strcmp(methodStr,"median"))                     return MEDIAN;
-  if(0 == strcmp(methodStr,"centroid"))           return CENTROID;
-  if(0 == strcmp(methodStr,"flexible_group"))     return FLEXIBLE_GROUP;
-  if(0 == strcmp(methodStr,"flexible"))           return FLEXIBLE;
-  if(0 == strcmp(methodStr,"ward"))                       return WARD;
-  if(0 == strcmp(methodStr,"mcquitty"))           return MCQUITTY;
-  return SINGLE;
-}
+// hc_method getClusterEnum(const char * methodStr)
+// {
+//   if(0 == strcmp(methodStr,"complete"))           return COMPLETE;
+//   if(0 == strcmp(methodStr,"wpgma"))                      return WPGMA;
+//   if(0 == strcmp(methodStr,"average"))            return AVERAGE;
+//   if(0 == strcmp(methodStr,"median"))                     return MEDIAN;
+//   if(0 == strcmp(methodStr,"centroid"))           return CENTROID;
+//   if(0 == strcmp(methodStr,"flexible_group"))     return FLEXIBLE_GROUP;
+//   if(0 == strcmp(methodStr,"flexible"))           return FLEXIBLE;
+//   if(0 == strcmp(methodStr,"ward"))                       return WARD;
+//   if(0 == strcmp(methodStr,"mcquitty"))           return MCQUITTY;
+//   return SINGLE;
+// }
 
 // void Rdistclust(const char ** distmethod, const char ** clustmethod,
 //                 const float * points, const int * numPoints, const int * dim,
