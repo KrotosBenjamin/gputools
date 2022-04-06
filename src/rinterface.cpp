@@ -11,7 +11,7 @@
 #include "cuseful.h"
 #include "distance.h"
 #include "granger.h"
-//#include "hcluster.h"
+#include "hcluster.h"
 #include "kendall.h"
 #include "lsfit.h"
 #include "matmult.h"
@@ -155,53 +155,53 @@ dist_method getDistEnum(const char * methodStr)
   return EUCLIDEAN;
 }
 
-// hc_method getClusterEnum(const char * methodStr)
-// {
-//   if(0 == strcmp(methodStr,"complete"))           return COMPLETE;
-//   if(0 == strcmp(methodStr,"wpgma"))                      return WPGMA;
-//   if(0 == strcmp(methodStr,"average"))            return AVERAGE;
-//   if(0 == strcmp(methodStr,"median"))                     return MEDIAN;
-//   if(0 == strcmp(methodStr,"centroid"))           return CENTROID;
-//   if(0 == strcmp(methodStr,"flexible_group"))     return FLEXIBLE_GROUP;
-//   if(0 == strcmp(methodStr,"flexible"))           return FLEXIBLE;
-//   if(0 == strcmp(methodStr,"ward"))                       return WARD;
-//   if(0 == strcmp(methodStr,"mcquitty"))           return MCQUITTY;
-//   return SINGLE;
-// }
+hc_method getClusterEnum(const char * methodStr)
+{
+  if(0 == strcmp(methodStr,"complete"))           return COMPLETE;
+  if(0 == strcmp(methodStr,"wpgma"))                      return WPGMA;
+  if(0 == strcmp(methodStr,"average"))            return AVERAGE;
+  if(0 == strcmp(methodStr,"median"))                     return MEDIAN;
+  if(0 == strcmp(methodStr,"centroid"))           return CENTROID;
+  if(0 == strcmp(methodStr,"flexible_group"))     return FLEXIBLE_GROUP;
+  if(0 == strcmp(methodStr,"flexible"))           return FLEXIBLE;
+  if(0 == strcmp(methodStr,"ward"))                       return WARD;
+  if(0 == strcmp(methodStr,"mcquitty"))           return MCQUITTY;
+  return SINGLE;
+}
 
-// void Rdistclust(const char ** distmethod, const char ** clustmethod,
-//                 const float * points, const int * numPoints, const int * dim,
-//                 int * merge, int * order, float * val)
-// {
-//   dist_method dmeth = getDistEnum(*distmethod);
-//   hc_method hcmeth = getClusterEnum(*clustmethod);
+void Rdistclust(const char ** distmethod, const char ** clustmethod,
+                const float * points, const int * numPoints, const int * dim,
+                int * merge, int * order, float * val)
+{
+  dist_method dmeth = getDistEnum(*distmethod);
+  hc_method hcmeth = getClusterEnum(*clustmethod);
 
-//   size_t dpitch = 0;
-//   float * gpuDistances = NULL;
+  size_t dpitch = 0;
+  float * gpuDistances = NULL;
 
-//   distanceLeaveOnGpu(dmeth, 2.f, points, *dim, *numPoints,
-//                      &gpuDistances, &dpitch);
+  distanceLeaveOnGpu(dmeth, 2.f, points, *dim, *numPoints,
+                     &gpuDistances, &dpitch);
 
-//   size_t len = (*numPoints) - 1;
-//   float
-//     lambda = 0.5f, beta = 0.5f;
-//   int
-//     * presub, * presup;
+  size_t len = (*numPoints) - 1;
+  float
+    lambda = 0.5f, beta = 0.5f;
+  int
+    * presub, * presup;
 
-//   presub = Calloc(len, int);
-//   presup = Calloc(len, int);
+  presub = Calloc(len, int);
+  presup = Calloc(len, int);
 
-//   hclusterPreparedDistances(gpuDistances, dpitch, *numPoints,
-//                             presub, presup,
-//                             val,
-//                             hcmeth,
-//                             lambda, beta);
+  hclusterPreparedDistances(gpuDistances, dpitch, *numPoints,
+                            presub, presup,
+                            val,
+                            hcmeth,
+                            lambda, beta);
 
-//   formatClustering(len, presub, presup, merge, order);
+  formatClustering(len, presub, presup, merge, order);
 
-//   Free(presub);
-//   Free(presup);
-// }
+  Free(presub);
+  Free(presup);
+}
 
 void Rdistances(const float * points, const int * numPoints, const int * dim,
                 float * distances, const char ** method, const float *p)
@@ -213,30 +213,30 @@ void Rdistances(const float * points, const int * numPoints, const int * dim,
            (*numPoints)*sizeof(float), nummethod, *p);
 }
 
-// void Rhcluster(const float * distMat, const int * numPoints,
-//                int * merge, int * order, float * val,
-//                const char ** method)
-// {
-//   hc_method nummethod = getClusterEnum(*method);
+void Rhcluster(const float * distMat, const int * numPoints,
+               int * merge, int * order, float * val,
+               const char ** method)
+{
+  hc_method nummethod = getClusterEnum(*method);
 
-//   size_t len = (*numPoints) - 1;
-//   size_t pitch = (*numPoints) * sizeof(float);
-//   float lambda = 0.5;
-//   float beta = 0.5;
-//   int
-//     * presub, * presup;
+  size_t len = (*numPoints) - 1;
+  size_t pitch = (*numPoints) * sizeof(float);
+  float lambda = 0.5;
+  float beta = 0.5;
+  int
+    * presub, * presup;
 
-//   presub = Calloc(len, int);
-//   presup = Calloc(len, int);
+  presub = Calloc(len, int);
+  presup = Calloc(len, int);
 
-//   hcluster(distMat, pitch, *numPoints, presub, presup, val, nummethod,
-//            lambda, beta);
+  hcluster(distMat, pitch, *numPoints, presub, presup, val, nummethod,
+           lambda, beta);
 
-//   formatClustering(len, presub, presup, merge, order);
+  formatClustering(len, presub, presup, merge, order);
 
-//   Free(presub);
-//   Free(presup);
-// }
+  Free(presub);
+  Free(presup);
+}
 
 void formatClustering(const int len, const int * sub,  const int * sup,
                       int * merge, int * order)
