@@ -203,17 +203,25 @@ void cudaLaunch(std::string kernelName,
   const CudaKernel * cudaKernel = (*cudaKernels)[kernelName];
 
   CUmodule module;
-  CUDA_SAFE_CALL(cuModuleLoadDataEx(&module, cudaKernel->ptx, 0, 0, 0));
+  // CUDA_SAFE_CALL(cuModuleLoadDataEx(&module, cudaKernel->ptx, 0, 0, 0));
+  cuModuleLoadDataEx(&module, cudaKernel->ptx, 0, 0, 0);
 
   CUfunction kernel;
-  CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, cudaKernel->name));
+  // CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, cudaKernel->name));
+  cuModuleGetFunction(&kernel, module, cudaKernel->name);
 
-  CUDA_SAFE_CALL(
-    cuLaunchKernel(kernel,
-      gridDim.x, gridDim.y, gridDim.z,    // grid dim
-      blockDim.x, blockDim.y, blockDim.z, // block dim
-      0, stream,                    // shared mem and stream
-      args, 0));                  // arguments
-  //  CUDA_SAFE_CALL(cuCtxSynchronize());
-  CUDA_SAFE_CALL(cuModuleUnload(module));
+  // CUDA_SAFE_CALL(
+  //   cuLaunchKernel(kernel,
+  //     gridDim.x, gridDim.y, gridDim.z,    // grid dim
+  //     blockDim.x, blockDim.y, blockDim.z, // block dim
+  //     0, stream,                    // shared mem and stream
+  //     args, 0));                  // arguments
+  // //  CUDA_SAFE_CALL(cuCtxSynchronize());
+  // CUDA_SAFE_CALL(cuModuleUnload(module));
+  cuLaunchKernel(kernel,
+                 gridDim.x, gridDim.y, gridDim.z,   // grid dim
+                 blockDim.x, blockDim.y, blockDim.z,// block dim
+                 0, stream,                         // shared mem and stream
+                 args, 0);                          // arguments
+  cuModuleUnload(module);
 }
