@@ -3,10 +3,10 @@
 #include <string>
 #include <algorithm>
 
-#include "R.h"
-#include "nvrtc.h"
-#include "cuda_runtime.h"
-#include "cuda_runtime_api.h"
+#include <R.h>
+#include <nvrtc.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
 
 #include "cudaUtils.h"
 
