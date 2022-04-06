@@ -122,7 +122,7 @@ void cuCompile(const int * numFiles,
                const char ** cuSrc)
 {
   cudaKernels = new std::map<std::string, CudaKernel *>();
-  CUDA_SAFE_CALL(cuInit(0));
+  cuInit(0); //CUDA_SAFE_CALL(cuInit(0));
 
   for (int i = 0; i < *numFiles; ++i) {
     std::string file = cuFilenames[i];
