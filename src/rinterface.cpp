@@ -11,7 +11,7 @@
 #include "cuseful.h"
 #include "distance.h"
 #include "granger.h"
-#include "hcluster.h"
+//#include "hcluster.h"
 #include "kendall.h"
 #include "lsfit.h"
 #include "matmult.h"
@@ -54,25 +54,25 @@ void rpmcc(const int * whichObs,
        numPairs, correlations, signifs);
 }
 
-void rformatInput(const int * images, 
+void rformatInput(const int * images,
                   const int * xcoords, const int * ycoords, const int * zcoords,
                   const int * mins, const int * maxes,
-                  const float * evs, const int * numrows, const int * numimages, 
+                  const float * evs, const int * numrows, const int * numimages,
                   float * output)
 {
-  getData(images, xcoords, ycoords, zcoords, mins, maxes, evs, 
+  getData(images, xcoords, ycoords, zcoords, mins, maxes, evs,
           *numrows, *numimages, output);
 }
 
-void rformatOutput(const int * imageList1, const int * numImages1, 
-                   const int * imageList2, const int * numImages2, 
+void rformatOutput(const int * imageList1, const int * numImages1,
+                   const int * imageList2, const int * numImages2,
                    const int * structureid,
                    const double * cutCorrelation, const int * cutPairs,
-                   const double * correlations, const double * signifs, const int * numPairs, 
+                   const double * correlations, const double * signifs, const int * numPairs,
                    double * results, int * nrows)
 {
-  *nrows = (int) parseResults(imageList1, *numImages1, imageList2, 
-                              *numImages2, *structureid, *cutCorrelation, *cutPairs, 
+  *nrows = (int) parseResults(imageList1, *numImages1, imageList2,
+                              *numImages2, *structureid, *cutCorrelation, *cutPairs,
                               correlations, signifs, numPairs, results);
 }
 
@@ -84,14 +84,14 @@ void rgetDevice(int * device) {
   getDevice(device);
 }
 
-void rtestT(const float * pairs, const float * coeffs, const int * n, 
+void rtestT(const float * pairs, const float * coeffs, const int * n,
             float * ts)
 {
   testSignif(pairs, coeffs, (size_t) *n, ts);
 }
 
-void rhostT(const float * pairs, const float * coeffs, const int * n, 
-            float * ts) 
+void rhostT(const float * pairs, const float * coeffs, const int * n,
+            float * ts)
 {
   hostSignif(pairs, coeffs, (size_t) *n, ts);
 }
@@ -109,23 +109,23 @@ void RcublasPMCC(const float * samplesA, const int * numSamplesA,
                  const int * sampleSize,
                  float * correlations)
 {
-  cublasPMCC(samplesA, *numSamplesA, samplesB, *numSamplesB, *sampleSize, 
+  cublasPMCC(samplesA, *numSamplesA, samplesB, *numSamplesB, *sampleSize,
              correlations);
 }
 
-void RhostKendall(const float * X, const float * Y, const int * n, 
+void RhostKendall(const float * X, const float * Y, const int * n,
                   double * answer)
 {
   *answer = hostKendall(X, Y, *n);
 }
 
-void RpermHostKendall(const float * X, const int * nx, const float * Y, 
+void RpermHostKendall(const float * X, const int * nx, const float * Y,
                       const int * ny, const int * sampleSize, double * answers)
 {
   permHostKendall(X, *nx, Y, *ny, *sampleSize, answers);
 }
 
-void RgpuKendall(const float * X, const int * nx, const float * Y, 
+void RgpuKendall(const float * X, const int * nx, const float * Y,
                  const int * ny, const int * sampleSize, double * answers)
 {
   masterKendall(X, *nx, Y, *ny, *sampleSize, answers);
@@ -137,8 +137,8 @@ void rgpuGranger(const int * rows, const int * cols, const float * y,
   granger(*rows, *cols, y, *p, fStats, pValues);
 }
 
-void rgpuGrangerXY(const int * rows, const int * colsx, const float * x, 
-                   const int * colsy, const float * y, const int * p, 
+void rgpuGrangerXY(const int * rows, const int * colsx, const float * x,
+                   const int * colsy, const float * y, const int * p,
                    float * fStats, float * pValues)
 {
   grangerxy(*rows, *colsx, x, *colsy, y, *p, fStats, pValues);
@@ -169,76 +169,76 @@ hc_method getClusterEnum(const char * methodStr)
   return SINGLE;
 }
 
-void Rdistclust(const char ** distmethod, const char ** clustmethod, 
-                const float * points, const int * numPoints, const int * dim,
-                int * merge, int * order, float * val)
-{
-  dist_method dmeth = getDistEnum(*distmethod); 
-  hc_method hcmeth = getClusterEnum(*clustmethod); 
+// void Rdistclust(const char ** distmethod, const char ** clustmethod,
+//                 const float * points, const int * numPoints, const int * dim,
+//                 int * merge, int * order, float * val)
+// {
+//   dist_method dmeth = getDistEnum(*distmethod);
+//   hc_method hcmeth = getClusterEnum(*clustmethod);
 
-  size_t dpitch = 0;
-  float * gpuDistances = NULL;
+//   size_t dpitch = 0;
+//   float * gpuDistances = NULL;
 
-  distanceLeaveOnGpu(dmeth, 2.f, points, *dim, *numPoints, 
-                     &gpuDistances, &dpitch);
+//   distanceLeaveOnGpu(dmeth, 2.f, points, *dim, *numPoints,
+//                      &gpuDistances, &dpitch);
 
-  size_t len = (*numPoints) - 1;
-  float 
-    lambda = 0.5f, beta = 0.5f;
-  int 
-    * presub, * presup;
+//   size_t len = (*numPoints) - 1;
+//   float
+//     lambda = 0.5f, beta = 0.5f;
+//   int
+//     * presub, * presup;
 
-  presub = Calloc(len, int);
-  presup = Calloc(len, int);
+//   presub = Calloc(len, int);
+//   presup = Calloc(len, int);
 
-  hclusterPreparedDistances(gpuDistances, dpitch, *numPoints, 
-                            presub, presup,
-                            val,
-                            hcmeth,
-                            lambda, beta);
+//   hclusterPreparedDistances(gpuDistances, dpitch, *numPoints,
+//                             presub, presup,
+//                             val,
+//                             hcmeth,
+//                             lambda, beta);
 
-  formatClustering(len, presub, presup, merge, order);
+//   formatClustering(len, presub, presup, merge, order);
 
-  Free(presub);
-  Free(presup);
-}
+//   Free(presub);
+//   Free(presup);
+// }
 
 void Rdistances(const float * points, const int * numPoints, const int * dim,
                 float * distances, const char ** method, const float *p)
 {
-  dist_method nummethod = getDistEnum(*method); 
+  dist_method nummethod = getDistEnum(*method);
 
-  distance(points, (*dim)*sizeof(float), *numPoints, points, 
-           (*dim)*sizeof(float), *numPoints, *dim, distances, 
+  distance(points, (*dim)*sizeof(float), *numPoints, points,
+           (*dim)*sizeof(float), *numPoints, *dim, distances,
            (*numPoints)*sizeof(float), nummethod, *p);
 }
 
-void Rhcluster(const float * distMat, const int * numPoints, 
-               int * merge, int * order, float * val,
-               const char ** method)
-{
-  hc_method nummethod = getClusterEnum(*method); 
-        
-  size_t len = (*numPoints) - 1;
-  size_t pitch = (*numPoints) * sizeof(float);
-  float lambda = 0.5;
-  float beta = 0.5;
-  int 
-    * presub, * presup;
+// void Rhcluster(const float * distMat, const int * numPoints,
+//                int * merge, int * order, float * val,
+//                const char ** method)
+// {
+//   hc_method nummethod = getClusterEnum(*method);
 
-  presub = Calloc(len, int);
-  presup = Calloc(len, int);
+//   size_t len = (*numPoints) - 1;
+//   size_t pitch = (*numPoints) * sizeof(float);
+//   float lambda = 0.5;
+//   float beta = 0.5;
+//   int
+//     * presub, * presup;
 
-  hcluster(distMat, pitch, *numPoints, presub, presup, val, nummethod,
-           lambda, beta);
+//   presub = Calloc(len, int);
+//   presup = Calloc(len, int);
 
-  formatClustering(len, presub, presup, merge, order);
+//   hcluster(distMat, pitch, *numPoints, presub, presup, val, nummethod,
+//            lambda, beta);
 
-  Free(presub);
-  Free(presup);
-}
+//   formatClustering(len, presub, presup, merge, order);
 
-void formatClustering(const int len, const int * sub,  const int * sup, 
+//   Free(presub);
+//   Free(presup);
+// }
+
+void formatClustering(const int len, const int * sub,  const int * sup,
                       int * merge, int * order)
 {
   for(size_t i = 0; i < len; i++) {
@@ -252,12 +252,12 @@ void formatClustering(const int len, const int * sub,  const int * sup,
         merge[j] = i + 1;
       if((merge[j+len] == merge[i]) || (merge[j+len] == merge[i+len]))
         merge[j+len] = i + 1;
-      if(((merge[j+len] < 0) && (merge[j] > 0)) 
-         || ((merge[j] > 0) && (merge[j+len] > 0) 
+      if(((merge[j+len] < 0) && (merge[j] > 0))
+         || ((merge[j] > 0) && (merge[j+len] > 0)
              && (merge[j] > merge[j+len]))) {
         int holder = merge[j];
         merge[j] = merge[j+len];
-        merge[j+len] = holder; 
+        merge[j+len] = holder;
       }
     }
   }
@@ -266,13 +266,13 @@ void formatClustering(const int len, const int * sub,  const int * sup,
 
 void getPrintOrder(const int len, const int * merge, int * order)
 {
-  int 
+  int
     level = len-1, otop = len;
 
   depthFirst(len, merge, level, &otop, order);
 }
 
-void depthFirst(const int len, const int * merge, int level, int * otop, 
+void depthFirst(const int len, const int * merge, int level, int * otop,
                 int * order)
 {
   int
@@ -328,7 +328,7 @@ void RgetQRDecomp(int * rows, int * cols, float * a, float * q, int * pivot,
 
 // solve for B:  XB=Y where B and Y are vectors and X is a matrix of
 // dimension rows x cols
-void RqrSolver(int * rows, int * cols, float * matX, float * vectY, 
+void RqrSolver(int * rows, int * cols, float * matX, float * vectY,
                float * vectB)
 {
   int
@@ -414,7 +414,7 @@ void rSolveFromQR(const int * rows, const int * cols, const float * q, const flo
 
 void rBSplineMutualInfo(int * nBins, int * splineOrder, int * nsamples,
                         int * rowsA, const float * A,
-                        int * rowsB, const float * B, 
+                        int * rowsB, const float * B,
                         float * mutualInfo)
 {
   bSplineMutualInfo(*nBins, *splineOrder, *nsamples, *rowsA, A, *rowsB, B,
@@ -433,5 +433,5 @@ void RgpuLSFit(float *X, int *n, int *p, float *Y, int *nY,
   }
   else {
     //    gpuLSFitD(X, *n, *p, Y, *nY, *tol, coeffs, resids, effects, rank, pivot, qrAux);
-  }    
+  }
 }
